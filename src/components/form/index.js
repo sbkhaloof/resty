@@ -1,63 +1,81 @@
-// import { useState } from 'react';
+ import { useState } from 'react';
 // import axios from "axios"
 
 import './form.scss';
 
 function Form(props) {
   // declear state 
-  // const [textArea, setTextArea] = useState(false);
-  // const [method, setMethod] = useState("get")
-  // const [URL, setURL] = useState(" ");
-  // const [request, setRequest] = useState(" ");
-  async function handleSubmit(e) {
+  const [url,setUrl]=useState("");
+  const [request,setRequest]=useState("");
+  const [method,setMethod]=useState("get");
+  const[textArea,setTextArea]=useState(false);
+
+  const handleSubmit=async(e)=> {
     e.preventDefault();
-    let method = e.target.select.value;
-    let url = e.target.url.value;
-    let reqBody = e.target.text.value;
-    const formData = {
-      method: method,
-      url: url,
-      reqBody: reqBody
+    try{
+      const data={
+        method:method,
+        url:url,
+        request,
+      }
+await props.handleApiCall(data);
+    }catch(error){
+      console.log(error.message);
     }
-    props.handleApiCall(formData);
   };
-  // const URLHandler = (e) => {
-  //   setURL(e.target.value)
-  // };
-  // const methodHandler = (e) => {
-  //   setMethod(e.target.id);
-  //   setTextArea(false);
-  // };
-  // const textAreaHandler = (e) => {
-  //   setTextArea(true);
-  //   setMethod(e.target.id)
-  // };
-  // const requestHandler = (e) => {
-  //   setRequest(E.target.value)
-  // };
+  const handleURL=(e)=>{
+    setUrl(e.target.value)
+  }
+  const handleRequest=(e)=>{
+    let data=JSON.parse(e.target.value);
+    setRequest(data);
+  }
+  const handleGet=(e)=>{
+    setMethod("get");
+    setTextArea(false);
+  }
+  const handlePost=(e)=>{
+    setMethod("post");
+    setTextArea(true);
+  }
+  const handlePut=(e)=>{
+    setMethod("put");
+    setTextArea(true);
+  }
+  const handleDelete=(e)=>{
+    setMethod("delete");
+    setTextArea(false);
+  }
+ 
 
 
   return (
     <>
       <form onSubmit={handleSubmit}>
-        <label className="methods" for='select' > select hte method you want </label>
-        <select name="select" id='select'>
-          <option id="get" value='get'>GET</option>
-          <option id="post" value='post'>POST</option>
-          <option id="put" value='put'>PUT</option>
-          <option id="delete" value='delete'>DELETE</option>
-        </select>
-
-
-        <label >
+        <label>
           <span>URL: </span>
-          <input name='url' type='text' id='url' />
-          <button type="submit">GO!</button>
+          <input name="url" type="text" onChange={handleURL} />
+          <button type="submit" data-testid="submit">
+            GO!
+          </button>
         </label>
-        <textarea id="text" name="text" rows="4" cols="30">
-
-          for test get https://pokeapi.co/api/v2/pokemon
-        </textarea>
+        <label className="methods">
+          <span id="get" onClick={handleGet}>
+            GET
+          </span>
+          <span id="post" onClick={handlePost}>
+            POST
+          </span>
+          <span id="put" onClick={handlePut}>
+            PUT
+          </span>
+          <span id="delete" onClick={handleDelete}>
+            DELETE
+          </span>
+        </label>
+        {textArea && (
+          <textarea rows="15" cols="35" onChange={handleRequest}></textarea>
+        )}
       </form>
     </>
   );

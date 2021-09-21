@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState,useEffect} from 'react';
 
 import './app.scss';
 
@@ -10,60 +10,70 @@ import Form from './components/form';
 import Results from './components/results';
 import axios from 'axios';
 
-class App extends React.Component {
+function App(props){
+  const [data,setData]=useState('null');
+  const [requestParams,setRequestParams]=useState({});
+  const[body,setBody]=useState("");
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: null,
-      requestParams: {},
-    };
+  //use effect method
+  useEffect(()=>{
+    try{
+      async function getData(){
+        if(requestParams.url){
+          const response=await axios(
+            {
+              method:requestParams.method,
+              url:requestParams.url,
+              data:body
+            })
+            setData(response);
+        }
+      }
+      getData();
+    }catch(error){
+      console.log(error.message);
+    }
+  },[requestParams])
+  async function callApi(data){
+    console.log(data);
+    if(data.url !==""){
+      setRequestParams(data);
+      setBody(data.request)
+    }else{
+      const response= {
+            count: 2,
+            results: [
+              {name: 'fake thing 1', url: 'http://fakethings.com/1'},
+              {name: 'fake thing 2', url: 'http://fakethings.com/2'},
+            ],
+          };
+          setData({response});
+          setRequestParams(data);
+    }
   }
 
-  callApi = (requestParams) => {
-    // mock output
-    console.log(requestParams);
-    let reqBody=requestParams.reqBody;
-    let method=requestParams.method;
-    let url=requestParams.url;
-    // if(method=='post'||'put'){
-    //   axios[method](url,reqBody).then(result=>{
-    //     this.setState({
-    //       result:result.data,
-    //       requestParams:requestParams
-    //     })
-    //   })
-    // }else{
-      axios[method](url).then(result=>{
-        this.setState({
-          result:result.data,
-          requestParams:requestParams
-        })
-        console.log(result);
-      })
-    }
-  //   const data = {
-  //     count: 2,
-  //     results: [
-  //       {name: 'fake thing 1', url: 'http://fakethings.com/1'},
-  //       {name: 'fake thing 2', url: 'http://fakethings.com/2'},
-  //     ],
-  //   };
-  //   this.setState({data, requestParams});
-  // }
 
-  render() {
+  
+ 
+
+ 
     return (
       <React.Fragment>
         <Header />
-        <div>Request Method: {this.state.requestParams.method}</div>
-        <div>URL: {this.state.requestParams.url}</div>
-        <Form handleApiCall={this.callApi} />
-        <Results data={this.state.result} />
-        <Footer />
+        <div className="info">
+        <div>
+          <span>Request Method:</span> {requestParams.method}
+        </div>
+        <div>
+          <span>URL:</span> {requestParams.url}
+        </div>
+      </div>
+      <Form handleApiCall={callApi} />
+      <Results data={data} />
+      <Footer />
       </React.Fragment>
     );
   }
-}
+
 
 export default App;
