@@ -8,4 +8,28 @@
     overflow: scroll;
     color: white;
     padding: 5px;
+    box-shadow: 0 0 15px black;
+    border-radius: 0.5rem;
+
+    .result-titles h2{
+        text-decoration: underline;
+        
+    }
 }
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #000000;
+    border-radius: 2rem;
+
+}
+::-webkit-scrollbar-thumb {
+    background: rgb(160, 157, 157);
+    border-radius: 2rem;
+
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgb(255, 255, 255);
+}
+
