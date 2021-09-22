@@ -1,4 +1,4 @@
-import React,{useState,useEffect} from 'react';
+import React,{useState,useEffect,useReducer} from 'react';
 
 import './app.scss';
 
@@ -8,71 +8,87 @@ import Header from './components/header';
 import Footer from './components/footer';
 import Form from './components/form';
 import Results from './components/results';
+import History from "./components/history";
+
 import axios from 'axios';
 
-function App(props){
-  const [data,setData]=useState('null');
-  const [requestParams,setRequestParams]=useState({});
-  const[body,setBody]=useState("");
 
-  //use effect method
-  useEffect(()=>{
-    try{
-      async function getData(){
-        if(requestParams.url){
-          const response=await axios(
-            {
-              method:requestParams.method,
-              url:requestParams.url,
-              data:body
-            })
-            setData(response);
-        }
-      }
-      getData();
-    }catch(error){
-      console.log(error.message);
-    }
-  },[requestParams])
-  async function callApi(data){
-    console.log(data);
-    if(data.url !==""){
-      setRequestParams(data);
-      setBody(data.request)
-    }else{
-      const response= {
-            count: 2,
-            results: [
-              {name: 'fake thing 1', url: 'http://fakethings.com/1'},
-              {name: 'fake thing 2', url: 'http://fakethings.com/2'},
-            ],
-          };
-          setData({response});
-          setRequestParams(data);
-    }
+const initialState={
+  history:[]
+}
+function historyReducer(state,action){
+  const {type,payload}=action;
+  switch(action.type){
+    case "ADD_HISTORY":
+    const history=[...state.history,payload];
+    return {history}
+    default:
+      return state;
   }
+}
+function addAction(obj){
+  return{
+    type:"ADD_HISTORY",
+    payload:{ obj }
+  }
+}
 
+function App(props){
+  const [requestParams, setRequestParams] = useState({});
+  const [result, setResult] = useState(null);
+  const [render, setRender] = useState("");
+  const [state, dispatch] = useReducer(historyReducer, initialState);
 
   
- 
+  const callApi = (requestParams) => {
+    // mock output
+    console.log(requestParams);
+    let reqBody = requestParams.reqBody;
+    let method = requestParams.method;
+    let url = requestParams.url;
+    if (method == "post" || method == "put") {
+      axios[method](url, reqBody).then((results) => {
+        setResult(results.data);
+        setRequestParams({ ...requestParams, requestParams });
+      });
+      dispatch(
+        addAction({
+          method: method,
+          url: url,
+          reqBody: reqBody,
+        })
+      );
+    } else {
+      axios[method](url).then((results) => {
+        setResult(results.data);
+        setRequestParams({ ...requestParams, requestParams });
+      });
+      dispatch(
+        addAction({
+          method: method,
+          url: url,
+        })
+      );
+    }
+  };
 
- 
-    return (
-      <React.Fragment>
-        <Header />
-        <div className="info">
-        <div>
-          <span>Request Method:</span> {requestParams.method}
-        </div>
-        <div>
-          <span>URL:</span> {requestParams.url}
-        </div>
-      </div>
+  useEffect(() => {
+    setRender(`method : ${requestParams.method}   ,  URL : ${requestParams.url}`);
+  });
+
+
+     return (
+    <React.Fragment>
+      <Header />
+      <div>Request Method: {requestParams.method}</div>
+      <div>URL: {requestParams.url}</div>
+      <div>i run from useEffect : {render}</div>
+      <History history={state.history} handleApiCall={callApi} />
       <Form handleApiCall={callApi} />
-      <Results data={data} />
+      <Results data={result} />
       <Footer />
-      </React.Fragment>
-    );
+    </React.Fragment>
+  );
   }
 
 
