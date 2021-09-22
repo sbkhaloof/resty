@@ -8,19 +8,10 @@ function Results(props){
  
     return (
       <div className="result-container">
-      <div className="result">
-        {props.data ? (
-          <div className="result-titles">
-            <h2>HEADERS:</h2>
-            <ReactJson src={props.data.headers} />
-            <h2>DATA:</h2>
-            <ReactJson src={props.data.data} />
-          </div>
-        ) : (
-          <Loading />
-        )}
+      <pre className="result">
+      {props.data ? JSON.stringify(props.data, undefined, 2) :<Loading />}
+      </pre>
       </div>
-    </div>
     );
   }
 export default Results;
