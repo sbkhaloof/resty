@@ -1,16 +1,16 @@
-import React from 'react';
-import ReactJson from "react-json-view";
+ import React from 'react';
+// import ReactJson from "react-json-view";
 import Loading from "../loading/index"
+import JSONPretty from 'react-json-pretty';
+import 'react-json-pretty/themes/monikai.css';
 
 import "./result.scss"
 
 function Results(props){
  
     return (
-      <div className="result-container">
-      <pre className="result">
-      {props.data ? JSON.stringify(props.data, undefined, 2) :<Loading />}
-      </pre>
+      <div className="result">
+      <pre>{props.data ? <JSONPretty data={props.data} />: <Loading/>}</pre>
       </div>
     );
   }

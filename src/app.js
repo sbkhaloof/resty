@@ -1,4 +1,4 @@
-import React,{useState,useEffect,useReducer} from 'react';
+import React, { useState, useEffect } from 'react';
 
 import './app.scss';
 
@@ -8,88 +8,121 @@ import Header from './components/header';
 import Footer from './components/footer';
 import Form from './components/form';
 import Results from './components/results';
-import History from "./components/history";
-
 import axios from 'axios';
 
+//-------------------lab27----------------------------------
 
-const initialState={
-  history:[]
-}
-function historyReducer(state,action){
-  const {type,payload}=action;
-  switch(action.type){
-    case "ADD_HISTORY":
-    const history=[...state.history,payload];
-    return {history}
-    default:
-      return state;
-  }
-}
-function addAction(obj){
-  return{
-    type:"ADD_HISTORY",
-    payload:{ obj }
-  }
-}
+// class App extends React.Component {
 
-function App(props){
+//   constructor(props) {
+//     super(props);
+//     this.state = {
+//       data: null,
+//       requestParams: {},
+//     };
+//   }
+
+//   callApi = (requestParams) => {
+//     // mock output
+//     console.log(requestParams);
+//     let reqBody=requestParams.reqBody;
+//     let method=requestParams.method;
+//     let url=requestParams.url;
+
+//       axios[method](url).then(result=>{
+//         this.setState({
+//           result:result.data,
+//           requestParams:requestParams
+//         })
+//         console.log(result);
+//       })
+//     }
+
+
+//   render() {
+//     return (
+//       <React.Fragment>
+//         <Header />
+//         <div>Request Method: {this.state.requestParams.method}</div>
+//         <div>URL: {this.state.requestParams.url}</div>
+//         <Form handleApiCall={this.callApi} />
+//         <Results data={this.state.result} />
+//         <Footer />
+//       </React.Fragment>
+//     );
+//   }
+// }
+//====================================================================
+
+//------------------------------lab28---------------------------
+// refactor app component to functional  as first 
+function APP(props) {
+  // declear stats using useState method 
+  const [data, setData] = useState("null");
   const [requestParams, setRequestParams] = useState({});
-  const [result, setResult] = useState(null);
-  const [render, setRender] = useState("");
-  const [state, dispatch] = useReducer(historyReducer, initialState);
+  const [body, setBody] = useState('');
 
-  
-  const callApi = (requestParams) => {
-    // mock output
-    console.log(requestParams);
-    let reqBody = requestParams.reqBody;
-    let method = requestParams.method;
-    let url = requestParams.url;
-    if (method == "post" || method == "put") {
-      axios[method](url, reqBody).then((results) => {
-        setResult(results.data);
-        setRequestParams({ ...requestParams, requestParams });
-      });
-      dispatch(
-        addAction({
-          method: method,
-          url: url,
-          reqBody: reqBody,
-        })
-      );
-    } else {
-      axios[method](url).then((results) => {
-        setResult(results.data);
-        setRequestParams({ ...requestParams, requestParams });
-      });
-      dispatch(
-        addAction({
-          method: method,
-          url: url,
-        })
-      );
-    }
-  };
+  const [loading, setLoading] = useState(false);//for loading component
 
+  // use effect method 
   useEffect(() => {
-    setRender(`method : ${requestParams.method}   ,  URL : ${requestParams.url}`);
-  });
+    async function getFormData(){
+      /**
+       
+ check on the request data from the form
+ and updates the request variable in state with
+ the url, method, and potentially the body
 
+       */
+      if(requestParams.url){
+        // runs the API request with the new request options from state
+        const res=await axios (
+          {
+            method:requestParams.method,
+            url:requestParams.url,
+            data:body,
+          }
+        )
+        setData(res);
+      }
+    }
+    getFormData();
+    //has an effect hook that’s looking for changes to the request variable in state
+  },[requestParams])
 
-     return (
-    <React.Fragment>
-      <Header />
-      <div>Request Method: {requestParams.method}</div>
-      <div>URL: {requestParams.url}</div>
-      <div>i run from useEffect : {render}</div>
-      <History history={state.history} handleApiCall={callApi} />
-      <Form handleApiCall={callApi} />
-      <Results data={result} />
-      <Footer />
-    </React.Fragment>
-  );
-  }
+  // call api function
 
+  async function callApi(data) {
+      if (data.url !== "") {
+      setRequestParams(data);
+      setBody(data.request)
+    } else {
+       // mock output
+      const response = {
+        count: 2,
+        results: [
+          { name: 'fake thing 1', url: 'http://fakethings.com/1' },
+          { name: 'fake thing 2', url: 'http://fakethings.com/2' },
+        ],
+      };
+      setData({ response });
+      setRequestParams(data);
+    }
+}
 
-export default App;
+return(
+  <>
+  <Header />
+  <div>
+    <span>Request Method :</span>{requestParams.method}
+    <br />
+    <br />  
+    <span>URL:</span>{requestParams.url}
+  </div>
+  <Form handleCallApi={callApi}/>
+  <Results data={data}/>
+  <Footer />
+  </>
+)
+}
+export default APP;
