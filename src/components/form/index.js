@@ -4,10 +4,11 @@
 import './form.scss';
 
 function Form(props) {
-  // declear state 
+  // declear state for user  entries
   const [url,setUrl]=useState("");
   const [request,setRequest]=useState("");
   const [method,setMethod]=useState("get");
+  // this state will be true  when using put ,post method
   const[textArea,setTextArea]=useState(false);
 
   const handleSubmit=async(e)=> {
@@ -16,13 +17,16 @@ function Form(props) {
       const data={
         method:method,
         url:url,
-        request,
+        request:request,
       }
-await props.handleApiCall(data);
+      // sends the user’s entries to
+      // the <App /> via method sent in through props
+await props.handleCallApi(data);
     }catch(error){
       console.log(error.message);
     }
   };
+  // update the states url,method ,request and textArea
   const handleURL=(e)=>{
     setUrl(e.target.value)
   }
